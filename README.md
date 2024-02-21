@@ -1,38 +1,80 @@
-# Welcome to Remix!
+# Remix SVGR!
 
-- [Remix Docs](https://remix.run/docs)
-
-## Development
-
-From your terminal:
+## From your terminal:
 
 ```sh
-npm run dev
+npm install --save-dev @svgr/cli @svgr/plugin-svgo @svgr/plugin-jsx @svgr/plugin-prettier npm-watch npm-run-all
 ```
 
-This starts your app in development mode, rebuilding assets on file changes.
+## package.json
 
-## Deployment
+```javascript
+  "scripts": {
+      // task to convert icons to components
+      // you may change the input and output directories
+      "icons": "npx @svgr/cli --out-dir app/svg -- public/svg",
 
-First, build your app for production:
+      // watch task
+      "icons:watch": "npm-watch icons",
 
-```sh
-npm run build
+      // compile once and start watching for changes
+      "dev:svg": "run-s icons icons:watch",
+
+      // remix dev
+      "dev:remix": "remix dev",
+
+      // run all dev: scripts including `dev:svg`
+      "dev": "run-p dev:*"
+  },
+  // npm-watch configuration
+  "watch": {
+    "icons": {
+      "patterns": [
+        "icons"
+      ],
+      "extensions": "svg",
+      "quiet": false
+    }
+  },
+  //...
 ```
 
-Then run the app in production mode:
+## svgr.config.cjs
 
-```sh
-npm start
+```javascript
+module.exports = {
+  plugins: ["@svgr/plugin-svgo", "@svgr/plugin-jsx", "@svgr/plugin-prettier"],
+  typescript: true,
+  jsxRuntime: "automatic",
+  //replaceAttrValues: { "": "currentColor" },
+};
 ```
 
-Now you'll need to pick a host to deploy it to.
+## svgo.config.cjs
 
-### DIY
+```javascript
+module.exports = {
+  plugins: [
+    {
+      name: "preset-default",
+      params: {
+        overrides: {
+          removeViewBox: false,
+        },
+      },
+    },
+  ],
+};
+```
 
-If you're familiar with deploying node applications, the built-in Remix app server is production-ready.
+## Your code
 
-Make sure to deploy the output of `remix build`
+```javascript
+import Star from "~/icons";
 
-- `build/`
-- `public/build/`
+const Example = () => (
+  <div>
+    <Star />
+  </div>
+);
+```
